@@ -1,0 +1,83 @@
+# -- name for this stream
+name: kafka-stream-filter
+
+# -- the port to use
+port: &port 3000
+
+# -- pod count
+replicaCount: 1
+
+# -- source topic
+sourceTopic:
+# -- filters
+filters:
+# -- destination topic
+destinationTopic:
+
+image:
+  # -- the image name to use
+  name: osskit/dafka-filter
+  # -- the image tag to use
+  tag: '0.1'
+
+livenessProbe:
+  httpGet:
+    # -- the path for liveness check
+    path: /up
+    port: *port
+readinessProbe:
+  httpGet:
+    # -- the path for readiness check
+    path: /ready
+    port: *port
+
+resources:
+  requests:
+    # -- cpu requests
+    cpu: '50m'
+    # -- memory requests
+    memory: '100Mi'
+  limits:
+    # -- cpu limits
+    cpu: '200m'
+    # -- memory limits
+    memory: '400Mi'
+
+metrics:
+  # -- should prometheus scrape this server
+  enabled: true
+  # -- a path prometheus should scrape metrics from
+  path: /metrics
+
+auth:
+  # -- should use authentication
+  enabled: false
+  # -- sasl username
+  saslUsername:
+  # -- sasl password (not encrypted)
+  saslPassword:
+  secrets:
+    # -- should mount secrets to opaque secrets
+    useOpaqueSecrets: true
+    # -- should use truststore
+    useTrustsore: false
+    gcp:
+      # -- gcp secret resource for sasl password
+      saslPasswordResource:
+      # -- gcp secret resource for truststore file
+      truststoreResource:
+      # -- gcp secret resource for truststore password
+      truststorePasswordResource:
+    vault:
+      # -- vault secret path for sasl password
+      saslPasswordSecretPath:
+      # -- vault secret key for sasl password
+      saslPasswordSecretKey:
+      # -- vault secret path for truststore file
+      truststoreSecretPath:
+      # -- vault secret key for truststore file
+      truststoreSecretKey:
+      # -- vault secret path for truststore password
+      truststorePasswordSecretPath:
+      # -- vault secret key for truststore password
+      truststorePasswordSecretKey:

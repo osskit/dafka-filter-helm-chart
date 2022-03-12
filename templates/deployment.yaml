@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.name }}-filter
+spec:
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  replicas: {{ .Values.replicaCount }}
+  selector:
+      matchLabels:
+        app: {{ .Release.Name }}-{{ .Values.name }}-filter
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-{{ .Values.name }}-filter
+      annotations:
+        prometheus.io/path: {{ .Values.metrics.path }}
+        prometheus.io/port: {{ .Values.port | quote }}
+        prometheus.io/scrape: {{ .Values.metrics.enabled | quote }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+{{ if .Values.auth.enabled }}
+  {{ if not .Values.auth.saslPassword }}
+          volumeMounts:
+            - name: kafka-secrets-volume
+              mountPath: /secrets-files
+  {{ end }}
+{{ end }}
+          ports:
+            - containerPort: {{ .Values.port }}
+          env:
+            - name: KAFKA_BROKER
+              value: {{ .Values.broker }}
+            - name: APPLICATION_ID_CONFIG
+              value: {{ .Values.applicationIdConfig | default .Release.Name }}
+            - name: USE_PROMETHEUS
+              value: {{ .Values.metrics.enabled | squote }}
+            - name: PORT
+              value: {{ .Values.port | squote }}
+            - name: USE_SASL_AUTH
+              value: {{ .Values.auth.enabled | squote }}
+        {{- if .Values.auth.enabled }}
+            - name: SASL_USERNAME
+              value: {{ .Values.auth.saslUsername }}
+            {{- if .Values.auth.saslPassword }}
+            - name: SASL_PASSWORD
+              value: {{ .Values.auth.saslPassword | squote }}
+            {{- else if .Values.auth.secrets.useOpaqueSecrets }}
+            - name: SASL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-{{ .Values.name }}-filter
+                  key: SASL_PASSWORD
+            {{- else }}
+            - name: SASL_PASSWORD_FILE_PATH
+              value: {{ .Values.auth.saslPasswordFilePath| squote }}
+            {{- end }}
+            {{- if .Values.auth.secrets.useTruststore }}
+            - name: TRUSTSTORE_FILE_PATH
+              value: /secrets-files/truststore
+            {{- if .Values.auth.secrets.useOpaqueSecrets}}
+            - name: TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-{{ .Values.name }}-filter
+                  key: TRUSTSTORE_PASSWORD
+            {{- else }}
+            - name: TRUSTSTORE_PASSWORD_FILE_PATH
+              value: /secrets-files/TRUSTSTORE_PASSWORD
+            {{- end }}
+            {{- end }}
+            - name: SOURCE_TOPIC
+              value: {{ .Values.sourceTopic }}
+            - name: FILTERS
+              value: {{ .Values.filters }}
+            - name: DESTINATION_TOPIC
+              value: {{ .Values.destinationTopic }}
+        {{- end }}
+          livenessProbe:
+{{ toYaml .Values.livenessProbe | indent 12 }}
+          readinessProbe:
+{{ toYaml .Values.readinessProbe | indent 12 }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+{{ if .Values.auth.enabled }}
+  {{ if not .Values.auth.saslPassword }}
+      volumes:
+        - name: kafka-secrets-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Release.Name }}-{{ .Values.name }}-filter
+  {{ end }}
+{{ end }}
