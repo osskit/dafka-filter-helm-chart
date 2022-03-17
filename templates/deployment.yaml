@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.name }}-filter
+  name: {{ .Values.name }}-filter-{{ .Release.Name }}
 spec:
   strategy:
     rollingUpdate:
@@ -9,11 +9,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
       matchLabels:
-        app: {{ .Release.Name }}-{{ .Values.name }}-filter
+        app: {{ .Values.name }}-filter-{{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-{{ .Values.name }}-filter
+        app: {{ .Values.name }}-filter-{{ .Release.Name }}
       annotations:
         prometheus.io/path: {{ .Values.metrics.path }}
         prometheus.io/port: {{ .Values.port | quote }}
@@ -54,7 +54,7 @@ spec:
             - name: SASL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-{{ .Values.name }}-filter
+                  name: {{ .Values.name }}-filter-{{ .Release.Name }}
                   key: SASL_PASSWORD
             {{- else }}
             - name: SASL_PASSWORD_FILE_PATH
@@ -67,7 +67,7 @@ spec:
             - name: TRUSTSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-{{ .Values.name }}-filter
+                  name: {{ .Values.name }}-filter-{{ .Release.Name }}
                   key: TRUSTSTORE_PASSWORD
             {{- else }}
             - name: TRUSTSTORE_PASSWORD_FILE_PATH
@@ -95,6 +95,6 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: {{ .Release.Name }}-{{ .Values.name }}-filter
+              secretProviderClass: {{ .Values.name }}-filter-{{ .Release.Name }}
   {{ end }}
 {{ end }}
