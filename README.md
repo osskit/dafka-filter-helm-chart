@@ -19,6 +19,7 @@ A Helm Chart for Dafka Filter
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.httpGet.path | string | `"/ready"` | the path for startup check |
 | startupProbe.httpGet.port | int | `3000` |  |
+| livenessProbe.initialDelaySeconds | int | `30` |  |
 | livenessProbe.httpGet.path | string | `"/ready"` | the path for liveness check |
 | livenessProbe.httpGet.port | int | `3000` |  |
 | readinessProbe.httpGet.path | string | `"/ready"` | the path for readiness check |
