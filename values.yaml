@@ -20,10 +20,16 @@ image:
   # -- the image tag to use
   tag: '0.1'
 
+startupProbe:
+  initialDelaySeconds: 60
+  httpGet:
+    # -- the path for startup check
+    path: /ready
+    port: *port
 livenessProbe:
   httpGet:
     # -- the path for liveness check
-    path: /up
+    path: /ready
     port: *port
 readinessProbe:
   httpGet:
