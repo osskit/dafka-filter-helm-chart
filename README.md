@@ -1,6 +1,6 @@
 # dafka-filter
 
-![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square)
+![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square)
 
 A Helm Chart for Dafka Filter
 
@@ -16,7 +16,10 @@ A Helm Chart for Dafka Filter
 | destinationTopic | string | `nil` | destination topic |
 | image.name | string | `"osskit/dafka-filter"` | the image name to use |
 | image.tag | string | `"0.1"` | the image tag to use |
-| livenessProbe.httpGet.path | string | `"/up"` | the path for liveness check |
+| startupProbe.initialDelaySeconds | int | `60` |  |
+| startupProbe.httpGet.path | string | `"/ready"` | the path for startup check |
+| startupProbe.httpGet.port | int | `3000` |  |
+| livenessProbe.httpGet.path | string | `"/ready"` | the path for liveness check |
 | livenessProbe.httpGet.port | int | `3000` |  |
 | readinessProbe.httpGet.path | string | `"/ready"` | the path for readiness check |
 | readinessProbe.httpGet.port | int | `3000` |  |
