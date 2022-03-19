@@ -37,7 +37,7 @@ spec:
             - name: KAFKA_BROKER
               value: {{ .Values.broker }}
             - name: APPLICATION_ID_CONFIG
-              value: {{ .Values.applicationIdConfig | default .Release.Name }}
+              value: {{ .Values.name }}-filter-{{ .Release.Name }}
             - name: USE_PROMETHEUS
               value: {{ .Values.metrics.enabled | squote }}
             - name: PORT
